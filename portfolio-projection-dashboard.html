@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เส้นทางสู่ 5 ล้าน · พอร์ตหุ้น US</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500;600&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0E1512; --bg2:#101A15;
+    --surface:#16211B; --surface2:#1C2A22;
+    --line:#26352C;
+    --text:#EAF2EC; --muted:#8FA89A;
+    --mint:#4FD49A; --mint-deep:#2E9E70;
+    --gold:#E4B65A; --gold-deep:#C5872B;
+    --terra:#E08A63;
+    --shadow:0 14px 44px -22px rgba(0,0,0,.8);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Sarabun',sans-serif;color:var(--text);line-height:1.5;
+    background:
+      radial-gradient(1100px 560px at 88% -8%, rgba(228,182,90,.10), transparent 60%),
+      radial-gradient(1000px 600px at -8% 108%, rgba(79,212,154,.12), transparent 58%),
+      var(--bg);
+    min-height:100vh;padding:clamp(14px,3.5vw,44px);
+  }
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.04;z-index:0;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+  .wrap{max-width:1120px;margin:0 auto;position:relative;z-index:1}
+
+  header{display:flex;align-items:center;gap:16px;margin-bottom:4px}
+  .badge{flex:0 0 auto;width:56px;height:56px;display:grid;place-items:center;border-radius:17px;
+    background:linear-gradient(150deg,var(--mint-deep),#185640);box-shadow:var(--shadow)}
+  .badge svg{width:30px;height:30px;stroke:var(--gold);fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+  h1{font-family:'Mitr';font-weight:500;font-size:clamp(1.4rem,3.8vw,2.2rem);letter-spacing:.3px}
+  .sub{color:var(--muted);font-size:.95rem;margin:2px 0 24px 72px}
+  @media(max-width:560px){.sub{margin-left:0}}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:22px}
+  h2{font-family:'Mitr';font-weight:500;font-size:1rem;color:var(--mint);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+  h2::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--gold)}
+
+  /* controls */
+  .controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:14px}
+  .field label{display:block;font-size:.8rem;font-weight:600;color:var(--muted);margin-bottom:5px}
+  .imoney{position:relative}
+  .imoney input{width:100%;font-family:'Sarabun';font-size:1.05rem;font-weight:600;color:var(--text);
+    background:var(--bg2);border:1.5px solid var(--line);border-radius:11px;padding:10px 46px 10px 12px;outline:none;
+    transition:.15s;font-variant-numeric:tabular-nums}
+  .imoney input:focus{border-color:var(--mint);box-shadow:0 0 0 3px rgba(79,212,154,.14)}
+  .imoney .u{position:absolute;right:11px;top:50%;transform:translateY(-50%);font-size:.78rem;color:var(--muted);pointer-events:none}
+
+  .scen{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+  .scen button{flex:1;min-width:96px;padding:9px;border:1.5px solid var(--line);background:var(--bg2);color:var(--muted);
+    border-radius:11px;font-family:'Sarabun';font-size:.85rem;font-weight:600;cursor:pointer;transition:.15s}
+  .scen button:hover{border-color:var(--mint);color:var(--text)}
+  .scen button.active{background:linear-gradient(135deg,var(--mint-deep),#1d6e50);border-color:transparent;color:#fff}
+
+  /* hero + stats */
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin:22px 0}
+  .stat{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px;position:relative;overflow:hidden}
+  .stat::after{content:"";position:absolute;right:-26px;top:-26px;width:80px;height:80px;border-radius:50%;
+    background:radial-gradient(circle,rgba(228,182,90,.12),transparent 70%)}
+  .stat .k{font-size:.8rem;color:var(--muted);font-weight:600;margin-bottom:6px}
+  .stat .v{font-family:'Mitr';font-weight:500;font-size:1.55rem;line-height:1.1;font-variant-numeric:tabular-nums}
+  .stat .v small{font-size:.85rem;color:var(--muted);font-family:'Sarabun'}
+  .stat.hero{grid-column:1/-1;background:linear-gradient(135deg,#16271F,#13201A);border-color:#2c4438}
+  .stat.hero .v{font-size:2.3rem}
+  .gold{color:var(--gold)} .mint{color:var(--mint)} .terra{color:var(--terra)}
+
+  /* progress */
+  .pbar{height:14px;border-radius:10px;background:var(--bg2);overflow:hidden;margin-top:12px;border:1px solid var(--line)}
+  .pfill{height:100%;border-radius:10px;background:linear-gradient(90deg,var(--mint),var(--gold));transition:width .5s ease}
+  .plabel{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted);margin-top:6px}
+
+  /* insight box */
+  .insight{background:linear-gradient(135deg,#1a2a1d,#172419);border:1px solid #2c4636;border-radius:18px;padding:18px 20px;margin-bottom:22px}
+  .insight .h{font-family:'Mitr';color:var(--gold);font-size:.98rem;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+  .insight p{font-size:.94rem;color:#cfe0d5}
+  .insight b{color:var(--mint);font-weight:700}
+
+  /* chart */
+  .chartwrap{position:relative;height:300px}
+
+  /* holdings */
+  .hold{display:flex;flex-direction:column;gap:10px}
+  .row{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+  .row .top{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:9px}
+  .row .sym{font-family:'Mitr';font-weight:500;font-size:1.02rem}
+  .row .sym span{font-family:'Sarabun';font-weight:400;color:var(--muted);font-size:.82rem;margin-left:7px}
+  .row .wt{font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
+  .row .mini{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;align-items:end}
+  @media(max-width:520px){.row .mini{grid-template-columns:1fr 1fr}.row .mini .proj{grid-column:1/-1}}
+  .mini .lab{font-size:.7rem;color:var(--muted);margin-bottom:3px;display:block;font-weight:600}
+  .mini input{width:100%;font-family:'Sarabun';font-size:.95rem;font-weight:600;color:var(--text);background:var(--surface);
+    border:1.4px solid var(--line);border-radius:9px;padding:7px 9px;outline:none;font-variant-numeric:tabular-nums}
+  .mini input:focus{border-color:var(--mint)}
+  .mini .proj{text-align:right}
+  .mini .proj .pv{font-family:'Mitr';font-weight:500;font-size:1.02rem;color:var(--mint);font-variant-numeric:tabular-nums}
+  .mini .proj .pv small{font-size:.72rem;color:var(--muted);font-family:'Sarabun'}
+
+  .btn-reset{margin-top:14px;padding:9px 16px;border:1.5px dashed var(--line);background:transparent;color:var(--muted);
+    border-radius:11px;font-family:'Sarabun';font-size:.85rem;cursor:pointer;transition:.15s}
+  .btn-reset:hover{border-color:var(--terra);color:var(--terra)}
+  .savedflag{font-size:.74rem;color:var(--mint);margin-left:12px;opacity:0;transition:.3s}
+  .savedflag.show{opacity:1}
+
+  .twocol{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start;margin-top:22px}
+  @media(max-width:820px){.twocol{grid-template-columns:1fr}}
+
+  footer{margin-top:24px;font-size:.78rem;color:var(--muted);text-align:center;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="badge"><svg viewBox="0 0 24 24"><path d="M3 17l5-6 4 4 7-9"/><path d="M21 6v5h-5"/></svg></div>
+    <div><h1>เส้นทางสู่ 5 ล้าน · พอร์ตหุ้น US</h1></div>
+  </header>
+  <p class="sub">ตั้งสมมติฐานผลตอบแทนเอง · เพิ่มเงินลงทุนได้ · คำนวณและบันทึกให้อัตโนมัติ</p>
+
+  <!-- CONTROL CARD -->
+  <div class="card">
+    <h2>ตั้งค่าเป้าหมายและเงินลงทุน</h2>
+    <div class="controls">
+      <div class="field"><label>เป้าหมาย</label><div class="imoney"><input id="goal" type="text" inputmode="numeric"><span class="u">บาท</span></div></div>
+      <div class="field"><label>ระยะเวลา</label><div class="imoney"><input id="years" type="text" inputmode="decimal"><span class="u">ปี</span></div></div>
+      <div class="field"><label>อัตราแลกเปลี่ยน</label><div class="imoney"><input id="fx" type="text" inputmode="decimal"><span class="u">฿/USD</span></div></div>
+      <div class="field"><label>ลงเพิ่มทุกเดือน</label><div class="imoney"><input id="monthly" type="text" inputmode="numeric"><span class="u">บาท</span></div></div>
+      <div class="field"><label>เงินก้อนเพิ่มตอนนี้</label><div class="imoney"><input id="lump" type="text" inputmode="numeric"><span class="u">บาท</span></div></div>
+    </div>
+    <label style="font-size:.8rem;font-weight:600;color:var(--muted);display:block;margin:6px 0 4px">สถานการณ์สมมติฐานผลตอบแทน</label>
+    <div class="scen">
+      <button data-s="cons">ระมัดระวัง</button>
+      <button data-s="base" class="active">ฐาน (ตั้งต้น)</button>
+      <button data-s="opt">เชิงรุก</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="stats">
+    <div class="stat hero">
+      <div class="k">มูลค่าที่คาดใน <span id="yrLabel">7</span> ปี</div>
+      <div class="v" id="projTotal">–</div>
+      <div class="pbar"><div class="pfill" id="pfill" style="width:0%"></div></div>
+      <div class="plabel"><span id="achieve">– ของเป้าหมาย</span><span id="goalLabel">เป้า 5,000,000 ฿</span></div>
+    </div>
+    <div class="stat"><div class="k">มูลค่าพอร์ตตอนนี้</div><div class="v" id="curTotal">–</div></div>
+    <div class="stat"><div class="k">ผลตอบแทนเฉลี่ยที่ตั้งไว้</div><div class="v mint" id="blended">–</div></div>
+    <div class="stat"><div class="k" id="gapK">ส่วนต่างจากเป้าหมาย</div><div class="v gold" id="gap">–</div></div>
+  </div>
+
+  <div class="insight">
+    <div class="h">💡 ต้องทำยังไงถึงถึงเป้า</div>
+    <p id="insightText">กำลังคำนวณ…</p>
+  </div>
+
+  <div class="card">
+    <h2>การเติบโตของพอร์ตเทียบกับเป้าหมาย</h2>
+    <div class="chartwrap"><canvas id="chart"></canvas></div>
+  </div>
+
+  <div class="card" style="margin-top:22px">
+    <h2>หุ้นรายตัว — ปรับมูลค่าและผลตอบแทนคาดหวังได้</h2>
+    <div class="hold" id="holdings"></div>
+    <button class="btn-reset" id="reset">↺ คืนค่าเริ่มต้นทั้งหมด</button>
+    <span class="savedflag" id="savedFlag">✓ บันทึกแล้ว</span>
+  </div>
+
+  <footer>
+    ตัวเลขทั้งหมดเป็น <b>การฉายภาพตามสมมติฐานที่คุณตั้งเอง ไม่ใช่การพยากรณ์หรือการการันตีผลตอบแทน</b> — การลงทุนมีความเสี่ยง
+    ผลตอบแทนจริงผันผวนได้มากในแต่ละปี และอดีตไม่ได้บอกอนาคต · เครื่องมือนี้ช่วยวางแผนเบื้องต้น ไม่ใช่คำแนะนำการลงทุน
+  </footer>
+</div>
+
+<script>
+const DEFAULTS = {
+  goal:5000000, years:7, fx:32.56, monthly:0, lump:0, scenario:'base',
+  holdings:[
+    {sym:'GOOGL',name:'Alphabet',usd:14385.56,r:10},
+    {sym:'AMZN', name:'Amazon',  usd:13241.80,r:11},
+    {sym:'NVDA', name:'NVIDIA',  usd:8209.19, r:13},
+    {sym:'RKLB', name:'Rocket Lab',usd:7957.45,r:12},
+    {sym:'MSFT', name:'Microsoft',usd:7701.02,r:10},
+    {sym:'TSM',  name:'TSMC',     usd:7542.44, r:12},
+    {sym:'META', name:'Meta',     usd:6934.04, r:10},
+    {sym:'AVGO', name:'Broadcom', usd:4595.46, r:12},
+    {sym:'PLTR', name:'Palantir', usd:2960.45, r:12},
+    {sym:'ASML', name:'ASML',     usd:2921.26, r:11},
+    {sym:'AAPL', name:'Apple',    usd:2370.95, r:8},
+    {sym:'TSLA', name:'Tesla',    usd:1164.96, r:10},
+    {sym:'LLY',  name:'Eli Lilly',usd:1071.95, r:10},
+    {sym:'BABA', name:'Alibaba',  usd:935.45,  r:8},
+    {sym:'INTC', name:'Intel',    usd:342.60,  r:5},
+    {sym:'OKLO', name:'Oklo',     usd:328.20,  r:12},
+    {sym:'NFLX', name:'Netflix',  usd:165.56,  r:9},
+  ]
+};
+const $ = id => document.getElementById(id);
+const fmt = n => Math.round(n).toLocaleString('th-TH');
+const fmt1 = n => n.toLocaleString('th-TH',{minimumFractionDigits:1,maximumFractionDigits:1});
+const parse = s => parseFloat(String(s).replace(/[^0-9.]/g,''))||0;
+
+let state = JSON.parse(JSON.stringify(DEFAULTS));
+let chart;
+
+/* ---- render editable holdings ---- */
+function renderHoldings(){
+  const wrap = $('holdings'); wrap.innerHTML='';
+  state.holdings.forEach((h,idx)=>{
+    const div=document.createElement('div');
+    div.className='row';
+    div.innerHTML=`
+      <div class="top"><div class="sym">${h.sym}<span>${h.name}</span></div><div class="wt" id="wt${idx}">–</div></div>
+      <div class="mini">
+        <div><span class="lab">มูลค่าตอนนี้ (USD)</span><input data-k="usd" data-i="${idx}" type="text" inputmode="decimal" value="${h.usd}"></div>
+        <div><span class="lab">ผลตอบแทน/ปี (%)</span><input data-k="r" data-i="${idx}" type="text" inputmode="decimal" value="${h.r}"></div>
+        <div class="proj"><span class="lab">คาดใน ${state.years} ปี</span><div class="pv" id="pv${idx}">–</div></div>
+      </div>`;
+    wrap.appendChild(div);
+  });
+  wrap.querySelectorAll('input').forEach(inp=>{
+    inp.addEventListener('input',e=>{
+      const i=+e.target.dataset.i, k=e.target.dataset.k;
+      state.holdings[i][k]=parse(e.target.value);
+      compute(); save();
+    });
+  });
+}
+
+/* ---- core projection ---- */
+function compute(){
+  const fx=parse($('fx').value)||32.56;
+  const years=parse($('years').value)||7;
+  const goal=parse($('goal').value)||5000000;
+  const monthly=parse($('monthly').value);
+  const lump=parse($('lump').value);
+  state.fx=fx;state.years=years;state.goal=goal;state.monthly=monthly;state.lump=lump;
+
+  let curTHB=0, projHoldTHB=0, weightSum=0, blendedNumer=0;
+  state.holdings.forEach((h,idx)=>{
+    const cTHB=h.usd*fx;
+    const pTHB=h.usd*Math.pow(1+h.r/100,years)*fx;
+    curTHB+=cTHB; projHoldTHB+=pTHB;
+    weightSum+=h.usd; blendedNumer+=h.usd*h.r;
+  });
+  const blended = weightSum>0 ? blendedNumer/weightSum : 0;
+  // weights + per-stock projected
+  state.holdings.forEach((h,idx)=>{
+    const pct = weightSum>0 ? (h.usd/weightSum*100):0;
+    const pTHB=h.usd*Math.pow(1+h.r/100,years)*fx;
+    const w=$('wt'+idx); if(w) w.textContent=fmt1(pct)+'%';
+    const pv=$('pv'+idx); if(pv) pv.innerHTML=fmt(pTHB)+' <small>฿</small>';
+  });
+
+  const ba=blended/100, rm=ba/12, n=Math.round(years*12);
+  const fvMonthly = monthly>0 ? (rm>0 ? monthly*((Math.pow(1+rm,n)-1)/rm) : monthly*n) : 0;
+  const fvLump = lump*Math.pow(1+ba,years);
+  const projTotal = projHoldTHB + fvMonthly + fvLump;
+
+  // headline
+  $('yrLabel').textContent=years%1===0?years:fmt1(years);
+  $('goalLabel').textContent='เป้า '+fmt(goal)+' ฿';
+  $('projTotal').innerHTML=fmt(projTotal)+' <small>฿</small>';
+  $('curTotal').innerHTML=fmt(curTHB)+' <small>฿</small>';
+  $('blended').textContent=fmt1(blended)+'% ต่อปี';
+  const ach=goal>0?projTotal/goal*100:0;
+  $('pfill').style.width=Math.min(ach,100)+'%';
+  $('achieve').textContent=fmt1(ach)+'% ของเป้าหมาย';
+  const gap=goal-projTotal;
+  if(gap>0){$('gapK').textContent='ยังขาดอีก';$('gap').textContent=fmt(gap)+' ฿';$('gap').className='v terra';}
+  else{$('gapK').textContent='เกินเป้าหมาย';$('gap').textContent='+'+fmt(-gap)+' ฿';$('gap').className='v mint';}
+
+  // what it takes
+  let txt='';
+  const reqReturn = (Math.pow(goal/(curTHB+lump),1/years)-1)*100; // with lump now, no monthly
+  if(gap<=0){
+    txt=`เยี่ยมมาก! ด้วยสมมติฐานปัจจุบัน พอร์ตคาดว่าจะ<b>เกินเป้า 5 ล้านบาท</b> ก่อนครบ ${years} ปี — ถ้าอยากเผื่อความเสี่ยง ลองกดสถานการณ์ "ระมัดระวัง" ดูว่ายังถึงเป้าไหม`;
+  } else {
+    // required monthly contribution at current blended to close gap
+    const fvCurLump=(curTHB+lump)*Math.pow(1+ba,years);
+    const remain=goal-fvCurLump;
+    let reqMonthly = remain>0 ? (rm>0 ? remain/((Math.pow(1+rm,n)-1)/rm) : remain/n) : 0;
+    txt=`ถ้าจะถึง <b>${fmt(goal)} บาท</b> ใน ${years} ปี มีสองทางเลือก: `+
+        `(1) ไม่ลงเพิ่มเลย แต่ต้องได้ผลตอบแทนเฉลี่ย ~<b>${fmt1(reqReturn)}% ต่อปี</b> หรือ `+
+        `(2) คงผลตอบแทน ${fmt1(blended)}% ไว้ แล้วลงเพิ่มเดือนละ ~<b>${fmt(reqMonthly)} บาท</b>`;
+  }
+  $('insightText').innerHTML=txt;
+
+  drawChart(years,fx,monthly,lump,ba,goal);
+}
+
+/* ---- chart: yearly trajectory vs goal ---- */
+function drawChart(years,fx,monthly,lump,ba,goal){
+  const labels=[],vals=[],goalLine=[];
+  const rm=ba/12;
+  const yMax=Math.ceil(years);
+  for(let t=0;t<=yMax;t++){
+    let v=0;
+    state.holdings.forEach(h=>{v+=h.usd*Math.pow(1+h.r/100,t)*fx;});
+    v+=lump*Math.pow(1+ba,t);
+    const m=Math.round(t*12);
+    v+= monthly>0 ? (rm>0?monthly*((Math.pow(1+rm,m)-1)/rm):monthly*m) : 0;
+    labels.push('ปีที่ '+t); vals.push(Math.round(v)); goalLine.push(goal);
+  }
+  const ctx=$('chart').getContext('2d');
+  if(chart)chart.destroy();
+  chart=new Chart(ctx,{type:'line',data:{labels,datasets:[
+    {label:'มูลค่าพอร์ตที่คาด',data:vals,borderColor:'#4FD49A',borderWidth:3,pointRadius:3,pointBackgroundColor:'#4FD49A',tension:.25,
+     fill:true,backgroundColor:c=>{const g=c.chart.ctx.createLinearGradient(0,0,0,300);g.addColorStop(0,'rgba(79,212,154,.32)');g.addColorStop(1,'rgba(79,212,154,0)');return g;}},
+    {label:'เป้าหมาย',data:goalLine,borderColor:'#E4B65A',borderWidth:2,borderDash:[7,5],pointRadius:0,fill:false}
+  ]},options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{labels:{font:{family:'Sarabun',size:12},color:'#8FA89A',boxWidth:16}},
+      tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmt(c.parsed.y)+' ฿'},bodyFont:{family:'Sarabun'},titleFont:{family:'Sarabun'}}},
+    scales:{y:{ticks:{callback:v=>(v/1000000).toFixed(1)+' ล.',font:{family:'Sarabun'},color:'#8FA89A'},grid:{color:'#1f2e25'},beginAtZero:true},
+      x:{ticks:{font:{family:'Sarabun'},color:'#8FA89A'},grid:{display:false}}}
+  }});
+}
+
+/* ---- scenarios ---- */
+function applyScenario(s){
+  state.scenario=s;
+  const shift = s==='cons'?-3 : s==='opt'?3 : 0;
+  state.holdings.forEach(h=>{
+    const def=DEFAULTS.holdings.find(d=>d.sym===h.sym);
+    h.r=Math.max(0,def.r+shift);
+  });
+  document.querySelectorAll('.scen button').forEach(b=>b.classList.toggle('active',b.dataset.s===s));
+  renderHoldings(); compute(); save();
+}
+
+/* ---- persistence ---- */
+async function save(){
+  try{ await window.storage.set('usPortfolioPlan',JSON.stringify(state),false);
+    const f=$('savedFlag');f.classList.add('show');clearTimeout(window._t);window._t=setTimeout(()=>f.classList.remove('show'),1100);
+  }catch(e){}
+}
+function setControls(){
+  $('goal').value=fmt(state.goal);$('years').value=state.years;$('fx').value=state.fx;
+  $('monthly').value=state.monthly?fmt(state.monthly):'0';$('lump').value=state.lump?fmt(state.lump):'0';
+  document.querySelectorAll('.scen button').forEach(b=>b.classList.toggle('active',b.dataset.s===state.scenario));
+}
+async function load(){
+  try{const r=await window.storage.get('usPortfolioPlan',false);
+    if(r&&r.value){const saved=JSON.parse(r.value);
+      state={...state,...saved};
+      // merge holdings by symbol so structure stays valid
+      state.holdings=DEFAULTS.holdings.map(d=>{const f=(saved.holdings||[]).find(x=>x.sym===d.sym);return f?{...d,usd:f.usd,r:f.r}:{...d};});
+    }
+  }catch(e){}
+  setControls(); renderHoldings(); compute();
+}
+
+/* ---- wire up (money fields: no reformatting of decimals on years/fx) ---- */
+['goal','monthly','lump'].forEach(id=>{
+  $(id).addEventListener('input',e=>{
+    const end=e.target.selectionStart===e.target.value.length;
+    const v=parse(e.target.value); e.target.value=v?v.toLocaleString('th-TH'):'';
+    if(end)e.target.selectionStart=e.target.selectionEnd=e.target.value.length;
+    compute(); save();
+  });
+});
+['years','fx'].forEach(id=>{
+  $(id).addEventListener('input',e=>{
+    if(e.target.value.includes(',')){const p=e.target.selectionStart;e.target.value=e.target.value.replace(',','.');e.target.selectionStart=e.target.selectionEnd=p;}
+    if(id==='years')renderHoldings(); // update "คาดใน X ปี" labels
+    compute(); save();
+  });
+});
+document.querySelectorAll('.scen button').forEach(b=>b.addEventListener('click',()=>applyScenario(b.dataset.s)));
+$('reset').addEventListener('click',()=>{state=JSON.parse(JSON.stringify(DEFAULTS));setControls();renderHoldings();compute();save();});
+
+load();
+</script>
+</body>
+</html>
